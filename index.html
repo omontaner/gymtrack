@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
+    <title>GymTrack Pro</title>
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS icons -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icon-192.png">
+    
+    <!-- Chart.js for statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">
+                <span class="logo-icon">💪</span>
+                GymTrack Pro
+            </h1>
+            <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- Navigation Tabs -->
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="workout">
+                    <span class="tab-icon">📝</span>
+                    Entrenar
+                </button>
+                <button class="tab-btn" data-tab="history">
+                    <span class="tab-icon">📊</span>
+                    Historial
+                </button>
+                <button class="tab-btn" data-tab="stats">
+                    <span class="tab-icon">📈</span>
+                    Estadísticas
+                </button>
+                <button class="tab-btn" data-tab="settings">
+                    <span class="tab-icon">⚙️</span>
+                    Ajustes
+                </button>
+            </nav>
+
+            <!-- Tab Content: Workout -->
+            <section id="workoutTab" class="tab-content active">
+                <div class="card">
+                    <h2 class="card-title">Nuevo Registro</h2>
+                    
+                    <form id="workoutForm" class="workout-form">
+                        <!-- Exercise Type -->
+                        <div class="form-group">
+                            <label for="exerciseType">Tipo de Ejercicio</label>
+                            <div class="input-with-button">
+                                <select id="exerciseType" required>
+                                    <option value="Fuerza">Fuerza</option>
+                                    <option value="Cardio">Cardio</option>
+                                    <option value="Estiramientos">Estiramientos</option>
+                                    <option value="Mixto">Mixto</option>
+                                </select>
+                                <button type="button" id="addExerciseType" class="btn-icon" title="Agregar tipo">
+                                    <span>➕</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Exercise Name -->
+                        <div class="form-group">
+                            <label for="exerciseName">Nombre del Ejercicio</label>
+                            <input type="text" id="exerciseName" placeholder="Ej: Press de banca" required>
+                        </div>
+
+                        <!-- Routine Day -->
+                        <div class="form-group">
+                            <label for="routineDay">Día de Rutina</label>
+                            <div class="input-with-button">
+                                <select id="routineDay" required>
+                                    <option value="Push">Push (Empuje)</option>
+                                    <option value="Pull">Pull (Tirón)</option>
+                                    <option value="Legs">Legs (Piernas)</option>
+                                    <option value="Upper">Upper (Tren Superior)</option>
+                                    <option value="Lower">Lower (Tren Inferior)</option>
+                                    <option value="Full Body">Full Body (Cuerpo Completo)</option>
+                                </select>
+                                <button type="button" id="addRoutineDay" class="btn-icon" title="Agregar día">
+                                    <span>➕</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Reps and Weight -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reps">Repeticiones</label>
+                                <input type="number" id="reps" min="1" placeholder="12" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="weight">Peso (kg)</label>
+                                <input type="number" id="weight" min="0" step="0.5" placeholder="50" required>
+                            </div>
+                        </div>
+
+                        <!-- Sets -->
+                        <div class="form-group">
+                            <label for="sets">Series</label>
+                            <input type="number" id="sets" min="1" value="1" required>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-group">
+                            <label for="notes">Notas (Opcional)</label>
+                            <textarea id="notes" rows="3" placeholder="Ej: Sentí buena conexión muscular"></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span class="btn-text">Guardar Registro</span>
+                        </button>
+
+                        <!-- Hidden field for editing -->
+                        <input type="hidden" id="editingId">
+                    </form>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Esta Semana</span>
+                            <span class="stat-value" id="weeklyWorkouts">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💪</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Récord Personal</span>
+                            <span class="stat-value" id="maxWeight">0 kg</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab Content: History -->
+            <section id="historyTab" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">Historial de Entrenamientos</h2>
+                    
+                    <!-- Filters -->
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="filterType">Filtrar por tipo:</label>
+                            <select id="filterType">
+                                <option value="">Todos</option>
+                                <option value="Fuerza">Fuerza</option>
+                                <option value="Cardio">Cardio</option>
+                                <option value="Estiramientos">Estiramientos</option>
+                                <option value="Mixto">Mixto</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterDay">Filtrar por día:</label>
+                            <select id="filterDay">
+                                <option value="">Todos</option>
+                                <option value="Push">Push</option>
+                                <option value="Pull">Pull</option>
+                                <option value="Legs">Legs</option>
+                                <option value="Upper">Upper</option>
+                                <option value="Lower">Lower</option>
+                                <option value="Full Body">Full Body</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <input type="text" id="searchExercise" placeholder="🔍 Buscar ejercicio...">
+                        </div>
+                    </div>
+
+                    <!-- History List -->
+                    <div id="historyList" class="history-list">
+                        <div class="empty-state">
+                            <span class="empty-icon">📋</span>
+                            <p>No hay registros aún. ¡Empieza a entrenar!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab Content: Statistics -->
+            <section id="statsTab" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">Estadísticas</h2>
+                    
+                    <!-- Stats Overview -->
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-box-icon">🏋️</div>
+                            <div class="stat-box-content">
+                                <span class="stat-box-label">Total Entrenamientos</span>
+                                <span class="stat-box-value" id="totalWorkouts">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-icon">📊</div>
+                            <div class="stat-box-content">
+                                <span class="stat-box-label">Total Repeticiones</span>
+                                <span class="stat-box-value" id="totalReps">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-icon">⚡</div>
+                            <div class="stat-box-content">
+                                <span class="stat-box-label">Volumen Total (kg)</span>
+                                <span class="stat-box-value" id="totalVolume">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-icon">🎯</div>
+                            <div class="stat-box-content">
+                                <span class="stat-box-label">Peso Máximo</span>
+                                <span class="stat-box-value" id="statMaxWeight">0 kg</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="chart-container">
+                        <h3>Progreso Semanal</h3>
+                        <canvas id="weeklyProgressChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Volumen por Tipo de Ejercicio</h3>
+                        <canvas id="exerciseTypeChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Distribución de Rutina</h3>
+                        <canvas id="routineDistributionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab Content: Settings -->
+            <section id="settingsTab" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">Ajustes</h2>
+                    
+                    <!-- Notifications -->
+                    <div class="setting-group">
+                        <h3>Recordatorios</h3>
+                        <div class="setting-item">
+                            <label class="switch-label">
+                                <span>Recordatorios diarios</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="dailyReminder">
+                                    <span class="slider"></span>
+                                </label>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label for="reminderTime">Hora del recordatorio:</label>
+                            <input type="time" id="reminderTime" value="09:00">
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="setting-group">
+                        <h3>Gestión de Datos</h3>
+                        <button class="btn btn-secondary" id="exportData">
+                            <span>📤 Exportar Datos (JSON)</span>
+                        </button>
+                        <button class="btn btn-secondary" id="importData">
+                            <span>📥 Importar Datos</span>
+                        </button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                        <button class="btn btn-danger" id="clearData">
+                            <span>🗑️ Borrar Todos los Datos</span>
+                        </button>
+                    </div>
+
+                    <!-- About -->
+                    <div class="setting-group">
+                        <h3>Acerca de</h3>
+                        <p class="about-text">
+                            <strong>GymTrack Pro v1.0</strong><br>
+                            Tu compañero personal de entrenamiento.<br>
+                            Todos los datos se guardan localmente en tu dispositivo.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Confirmar</h3>
+            <p id="modalMessage">¿Estás seguro?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="modalCancel">Cancelar</button>
+                <button class="btn btn-danger" id="modalConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script src="service-worker-register.js"></script>
+</body>
+</html>
